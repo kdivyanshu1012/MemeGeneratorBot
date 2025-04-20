@@ -22,32 +22,31 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 2rem;
 }
 
 header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
 }
 
 header h1 {
-    color: var(--primary-color);
-    font-size: 2.5rem;
+    color: #2c3e50;
     margin-bottom: 0.5rem;
 }
 
 header p {
-    color: #666;
+    color: #7f8c8d;
     font-size: 1.1rem;
 }
 
 .input-section {
-    background: white;
+    background: #fff;
     padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
 }
 
@@ -55,37 +54,42 @@ header p {
     margin-bottom: 1.5rem;
 }
 
-label {
+.input-group label {
     display: block;
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--text-color);
+    color: #2c3e50;
+    font-weight: bold;
 }
 
-input, select {
+select {
     width: 100%;
     padding: 0.8rem;
+    font-size: 1.1rem;
     border: 2px solid #e0e0e0;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    transition: var(--transition);
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
 }
 
-input:focus, select:focus {
+select:hover {
+    border-color: #3498db;
+}
+
+select:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: #2980b9;
 }
 
 button {
-    background-color: var(--primary-color);
+    background-color: #3498db;
     color: white;
     border: none;
     padding: 1rem 2rem;
-    border-radius: var(--border-radius);
+    font-size: 1.1rem;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: var(--transition);
+    transition: background-color 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -93,29 +97,47 @@ button {
 }
 
 button:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-2px);
+    background-color: #2980b9;
+}
+
+button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+#generate-btn {
+    width: 100%;
+    background-color: #2ecc71;
+}
+
+#generate-btn:hover {
+    background-color: #27ae60;
 }
 
 .result-section {
-    background: white;
+    background: #fff;
     padding: 2rem;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .hidden {
     display: none;
 }
 
+#loading {
+    text-align: center;
+    padding: 2rem;
+}
+
 .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid var(--primary-color);
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin: 2rem auto;
+    margin: 0 auto 1rem;
 }
 
 @keyframes spin {
@@ -123,54 +145,84 @@ button:hover {
     100% { transform: rotate(360deg); }
 }
 
+.loading-tip {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    font-style: italic;
+}
+
 .meme-container {
-    max-width: 100%;
-    margin: 2rem 0;
     text-align: center;
+    margin-bottom: 1.5rem;
 }
 
 .meme-container img {
     max-width: 100%;
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .action-buttons {
     display: flex;
     gap: 1rem;
     justify-content: center;
-    margin-top: 1rem;
+    flex-wrap: wrap;
 }
 
-#generate-btn {
-    width: 100%;
-    margin-top: 1rem;
+.action-buttons button {
+    flex: 1;
+    min-width: 150px;
+}
+
+#download-btn {
+    background-color: #e74c3c;
+}
+
+#download-btn:hover {
+    background-color: #c0392b;
+}
+
+#share-btn {
+    background-color: #9b59b6;
+}
+
+#share-btn:hover {
+    background-color: #8e44ad;
+}
+
+#another-btn {
+    background-color: #f39c12;
+}
+
+#another-btn:hover {
+    background-color: #d35400;
 }
 
 footer {
     text-align: center;
-    margin-top: 3rem;
-    color: #666;
+    margin-top: 2rem;
+    color: #7f8c8d;
 }
 
 footer i {
     color: #e74c3c;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
     .container {
         padding: 1rem;
     }
     
-    header h1 {
-        font-size: 2rem;
+    .input-section, .result-section {
+        padding: 1rem;
     }
     
     .action-buttons {
         flex-direction: column;
     }
     
-    button {
+    .action-buttons button {
         width: 100%;
     }
 } 

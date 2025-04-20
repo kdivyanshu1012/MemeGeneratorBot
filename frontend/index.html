@@ -3,39 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Meme Generator</title>
+    <title>Mood Meme Generator</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-laugh-beam"></i> Random Meme Generator</h1>
-            <p>Generate random programming memes with different emotions!</p>
+            <h1><i class="fas fa-laugh-beam"></i> Mood Meme Generator</h1>
+            <p>Pick a mood, get a random programming meme!</p>
         </header>
 
         <main>
             <div class="input-section">
                 <div class="input-group">
-                    <label for="emotion">Choose the emotion:</label>
+                    <label for="emotion">Select your mood:</label>
                     <select id="emotion">
-                        <option value="funny">Funny</option>
-                        <option value="sarcastic">Sarcastic</option>
-                        <option value="wholesome">Wholesome</option>
-                        <option value="ironic">Ironic</option>
-                        <option value="dramatic">Dramatic</option>
+                        <option value="funny">😄 Funny</option>
+                        <option value="sarcastic">😏 Sarcastic</option>
+                        <option value="wholesome">🥰 Wholesome</option>
+                        <option value="ironic">🤔 Ironic</option>
+                        <option value="dramatic">😱 Dramatic</option>
                     </select>
                 </div>
 
                 <button id="generate-btn">
-                    <i class="fas fa-magic"></i> Generate Random Meme
+                    <i class="fas fa-magic"></i> Generate Meme
                 </button>
             </div>
 
             <div class="result-section">
                 <div id="loading" class="hidden">
                     <div class="spinner"></div>
-                    <p>Creating your meme...</p>
+                    <p>Creating your meme... This might take a few moments</p>
+                    <p class="loading-tip">Tip: Each meme is uniquely generated based on your selected mood!</p>
                 </div>
                 
                 <div id="result" class="hidden">
@@ -50,7 +51,7 @@
                             <i class="fas fa-share-alt"></i> Share
                         </button>
                         <button id="another-btn">
-                            <i class="fas fa-redo"></i> Generate Another
+                            <i class="fas fa-redo"></i> Try Another Mood
                         </button>
                     </div>
                 </div>
@@ -58,7 +59,7 @@
         </main>
 
         <footer>
-            <p>Created with <i class="fas fa-heart"></i> using AI</p>
+            <p>Created with <i class="fas fa-heart"></i> for developers</p>
         </footer>
     </div>
     <script src="js/script.js"></script>
