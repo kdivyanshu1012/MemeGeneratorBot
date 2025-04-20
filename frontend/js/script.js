@@ -8,10 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultElement = document.getElementById('result');
     const memeImage = document.getElementById('meme-image');
 
-    // Update API URL to work with both local development and production
-    const API_URL = window.location.hostname === 'localhost' 
-        ? 'http://localhost:8000' 
-        : '';  // In production, use relative URL to avoid CORS issues
+    // In production, use the same domain as the frontend
+    const API_URL = '';
 
     async function generateMeme() {
         const emotion = emotionSelect.value;
@@ -40,10 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // If response is not JSON, get the text for error message
                 const text = await response.text();
+                console.error('Server response:', text);  // Log the full response
                 throw new Error(
                     response.status === 404 
-                        ? 'Server not found. Please make sure the backend server is running.'
-                        : `Server error: ${text.slice(0, 100)}...`
+                        ? 'API endpoint not found. Please check deployment configuration.'
+                        : 'Server error: Please try again later.'
                 );
             }
 
@@ -63,14 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Show appropriate error message based on the error type
             let errorMessage;
-            if (error.message.includes('Failed to fetch')) {
-                errorMessage = 'Unable to connect to the server. Please check if the backend server is running and try again.';
-            } else if (error.message.includes('Server not found')) {
-                errorMessage = error.message;
+            if (error.message.includes('API endpoint not found')) {
+                errorMessage = 'The meme generator service is not available. Please check the deployment configuration.';
             } else if (error.message.includes('Server error')) {
-                errorMessage = 'The server encountered an error. Please try again or check the server logs.';
+                errorMessage = 'The server encountered an error. Please try again in a few moments.';
             } else {
-                errorMessage = error.message;
+                errorMessage = 'Failed to generate meme. Please try again.';
             }
             
             alert(errorMessage);
