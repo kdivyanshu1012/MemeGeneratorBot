@@ -8,7 +8,6 @@ from pydantic import BaseModel
 import os
 import sys
 import random
-import numpy as np
 from datetime import datetime
 
 app = FastAPI()
