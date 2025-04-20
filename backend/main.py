@@ -56,101 +56,90 @@ async def general_exception_handler(request, exc):
 class MemeRequest(BaseModel):
     emotion: str
 
-# Predefined prompts for different emotions
-PROMPTS = {
+# Simplified color schemes
+COLOR_SCHEMES = {
+    "funny": ((255, 255, 150), (255, 200, 100)),     # Yellow to Orange
+    "sarcastic": ((200, 150, 255), (150, 100, 200)), # Purple tones
+    "wholesome": ((150, 255, 200), (100, 200, 255)), # Green to Blue
+    "ironic": ((255, 150, 150), (200, 100, 150)),    # Pink tones
+    "dramatic": ((150, 150, 255), (100, 100, 200))   # Blue tones
+}
+
+# Simplified templates
+TEMPLATES = {
     "funny": [
-        "trying to code at 3 AM",
-        "debugging without console.log",
-        "when the code works on first try",
-        "finding a semicolon error after 2 hours",
-        "using Stack Overflow for the 100th time today",
-        "when someone says they'll fix the bug later",
-        "forgetting to save the file",
-        "when the client says it's a small change"
+        "When {prompt}... 😂",
+        "Nobody:\nMe when {prompt} 🤣",
+        "That moment when {prompt} 😆",
+        "POV: {prompt} 😅"
     ],
     "sarcastic": [
-        "meetings that could have been emails",
-        "documentation that's totally up to date",
-        "perfectly commented code",
-        "code review feedback",
-        "project deadlines",
-        "agile planning",
-        "testing in production",
-        "legacy code maintenance"
+        "Oh sure, {prompt}... 🙄",
+        "Yeah, {prompt} is great... 😏",
+        "Me pretending {prompt} isn't happening 😒",
+        "When {prompt} strikes again 🤨"
     ],
     "wholesome": [
-        "helping junior developers",
-        "successfully fixing a bug",
-        "team collaboration",
-        "learning new technologies",
-        "code that runs smoothly",
-        "positive code reviews",
-        "clean code practices",
-        "celebrating project milestones"
+        "{prompt} makes everything better 🥰",
+        "Finding joy in {prompt} 💖",
+        "When {prompt} brings smiles ☺️",
+        "Grateful for {prompt} 🙏"
     ],
     "ironic": [
-        "writing temporary code",
-        "saying you'll document later",
-        "promising to refactor soon",
-        "backup plans",
-        "code optimization",
-        "following best practices",
-        "meeting estimations",
-        "work-life balance"
+        "Trying to avoid {prompt} 😅",
+        "Plot twist: {prompt} 🤔",
+        "Me vs {prompt} 😌",
+        "Just {prompt} things 🙃"
     ],
     "dramatic": [
-        "production server crashes",
-        "losing unsaved work",
+        "BREAKING: {prompt}! 😱",
+        "When {prompt} hits different 😫",
+        "Not {prompt} again! 😩",
+        "The drama of {prompt} 😤"
+    ]
+}
+
+# Simplified prompts
+PROMPTS = {
+    "funny": [
+        "debugging at 3 AM",
+        "the code works first try",
+        "finding a missing semicolon",
+        "Stack Overflow saves the day"
+    ],
+    "sarcastic": [
+        "meetings that could be emails",
+        "'well-documented' code",
+        "perfect code reviews",
+        "'quick' fixes"
+    ],
+    "wholesome": [
+        "helping new developers",
+        "fixing the bug",
+        "clean code",
+        "successful deployment"
+    ],
+    "ironic": [
+        "temporary solutions",
+        "'I'll document later'",
+        "code optimization",
+        "meeting deadlines"
+    ],
+    "dramatic": [
+        "production crashes",
         "merge conflicts",
-        "database migrations",
-        "deadline approaching",
-        "missing semicolons",
-        "infinite loops",
-        "memory leaks"
+        "missing backups",
+        "deadline approaching"
     ]
 }
 
 def generate_meme_text(emotion: str) -> tuple[str, str]:
     """Generate meme text based on templates and random selection."""
     try:
-        templates = {
-            "funny": [
-                "When {prompt} and you can't even...",
-                "Nobody:\nAbsolutely nobody:\nMe when {prompt}:",
-                "That moment when {prompt} hits different",
-                "POV: {prompt}",
-            ],
-            "sarcastic": [
-                "Oh sure, because {prompt} always works out great...",
-                "Yeah, {prompt} is exactly what we needed...",
-                "Me pretending {prompt} isn't a problem",
-                "When someone mentions {prompt} one more time...",
-            ],
-            "wholesome": [
-                "When {prompt} makes your whole day better",
-                "Finding joy in {prompt}",
-                "Spreading happiness with {prompt}",
-                "When {prompt} brings people together",
-            ],
-            "ironic": [
-                "Trying to avoid {prompt}\nAlso me: *does exactly that*",
-                "Plot twist: {prompt} was the solution all along",
-                "Me: I'm done with {prompt}\nLife: Are you sure about that?",
-                "When {prompt} becomes your personality",
-            ],
-            "dramatic": [
-                "BREAKING NEWS: {prompt} changes everything!",
-                "Top 10 anime betrayals: {prompt} edition",
-                "When {prompt} is just too much to handle",
-                "The saga of {prompt} continues...",
-            ]
-        }
-
-        # Default to funny if emotion not found
-        templates_for_emotion = templates.get(emotion.lower(), templates["funny"])
+        templates = TEMPLATES.get(emotion.lower(), TEMPLATES["funny"])
         prompts_for_emotion = PROMPTS.get(emotion.lower(), PROMPTS["funny"])
         
-        template = random.choice(templates_for_emotion)
+        template = random.choice(templates)
         prompt = random.choice(prompts_for_emotion)
         
         return template.format(prompt=prompt), prompt
@@ -161,17 +150,8 @@ def generate_meme_text(emotion: str) -> tuple[str, str]:
 def generate_gradient_background(width: int, height: int, emotion: str) -> Image.Image:
     """Generate a gradient background based on emotion."""
     try:
-        # Color schemes for different emotions
-        color_schemes = {
-            "funny": ((255, 255, 150), (255, 200, 100)),  # Yellow to Orange
-            "sarcastic": ((200, 150, 255), (150, 100, 200)),  # Purple tones
-            "wholesome": ((150, 255, 200), (100, 200, 255)),  # Green to Blue
-            "ironic": ((255, 150, 150), (200, 100, 150)),  # Pink tones
-            "dramatic": ((150, 150, 255), (100, 100, 200))   # Blue tones
-        }
-
         # Get color scheme or default to funny
-        color1, color2 = color_schemes.get(emotion.lower(), color_schemes["funny"])
+        color1, color2 = COLOR_SCHEMES.get(emotion.lower(), COLOR_SCHEMES["funny"])
         
         # Create gradient
         image = Image.new('RGB', (width, height))
@@ -246,82 +226,53 @@ async def health_check():
 @app.post("/api/generate-meme")
 async def generate_meme(request: MemeRequest):
     try:
-        logger.info(f"Generating meme with emotion: {request.emotion}")
-        
-        # Generate meme text
-        meme_text, prompt = generate_meme_text(request.emotion)
-        logger.info(f"Generated text: {meme_text}")
-        
-        # Create background image
-        width, height = 800, 600
-        image = generate_gradient_background(width, height, request.emotion)
-        draw = ImageDraw.Draw(image)
-        
-        # Get font
-        font = get_font(36)
-        
-        try:
-            # Calculate text position and wrap text
-            margin = 20
-            max_width = width - 2 * margin
-            words = meme_text.split()
-            lines = []
-            current_line = []
-            
-            for word in words:
-                current_line.append(word)
-                text = ' '.join(current_line)
-                # Use a basic text width calculation if getlength is not available
-                text_width = font.getlength(text) if hasattr(font, 'getlength') else len(text) * (font.size // 2)
-                
-                if text_width > max_width:
-                    if len(current_line) == 1:
-                        lines.append(word)
-                        current_line = []
-                    else:
-                        current_line.pop()
-                        lines.append(' '.join(current_line))
-                        current_line = [word]
-            
-            if current_line:
-                lines.append(' '.join(current_line))
-            
-            # Draw text with outline effect
-            y = margin
-            for line in lines:
-                # Calculate center position for each line
-                text_width = font.getlength(line) if hasattr(font, 'getlength') else len(line) * (font.size // 2)
-                x = (width - text_width) // 2
-                
-                # Draw text outline
-                outline_color = "black"
-                outline_width = 2
-                for dx in [-outline_width, outline_width]:
-                    for dy in [-outline_width, outline_width]:
-                        draw.text((x + dx, y + dy), line, font=font, fill=outline_color)
-                
-                # Draw main text
-                draw.text((x, y), line, font=font, fill="white")
-                y += font.size + 10
+        emotion = request.emotion.lower()
+        if emotion not in TEMPLATES:
+            emotion = "funny"  # Default fallback
 
-            # Convert image to base64
-            buffered = io.BytesIO()
-            image.save(buffered, format="PNG")
-            img_str = base64.b64encode(buffered.getvalue()).decode()
+        # Generate text
+        template = random.choice(TEMPLATES[emotion])
+        prompt = random.choice(PROMPTS[emotion])
+        meme_text = template.format(prompt=prompt)
+
+        # Create image
+        width, height = 800, 600
+        image = generate_gradient_background(width, height, emotion)
+        draw = ImageDraw.Draw(image)
+
+        # Get font
+        font = get_font(48)
+        
+        # Split text into lines
+        words = meme_text.split('\n')
+        y = height // 4
+        
+        for line in words:
+            # Simple center alignment
+            text_width = font.getlength(line) if hasattr(font, 'getlength') else len(line) * (font.size // 2)
+            x = (width - text_width) // 2
             
-            logger.info("Meme generated successfully")
+            # Draw text outline
+            outline_color = "black"
+            for dx, dy in [(-2,-2), (-2,2), (2,-2), (2,2)]:
+                draw.text((x + dx, y + dy), line, font=font, fill=outline_color)
             
-            return JSONResponse({
-                "status": "success",
-                "meme_text": meme_text,
-                "prompt": prompt,
-                "meme_image": f"data:image/png;base64,{img_str}"
-            })
-            
-        except Exception as e:
-            logger.error(f"Error in text rendering: {str(e)}")
-            raise HTTPException(status_code=500, detail=f"Error rendering text: {str(e)}")
-            
+            # Draw main text
+            draw.text((x, y), line, font=font, fill="white")
+            y += font.size + 10
+
+        # Convert to base64
+        buffered = io.BytesIO()
+        image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
+        return JSONResponse({
+            "status": "success",
+            "meme_text": meme_text,
+            "prompt": prompt,
+            "meme_image": f"data:image/png;base64,{img_str}"
+        })
+
     except Exception as e:
         logger.error(f"Error generating meme: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
