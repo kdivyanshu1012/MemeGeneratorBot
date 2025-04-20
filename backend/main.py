@@ -18,7 +18,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:8000",
-        "https://*.vercel.app"  # Allow Vercel preview deployments
+        "https://*.vercel.app",  # Allow Vercel preview deployments
+        "*"  # Allow all origins during development
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -34,14 +35,24 @@ def init_models():
     if text_generator is None:
         text_generator = pipeline('text-generation', model='gpt2')
     if image_generator is None:
+        # Use CPU for Vercel deployment
+        device = "cpu"
         image_generator = StableDiffusionPipeline.from_pretrained(
             "CompVis/stable-diffusion-v1-4",
-            torch_dtype=torch.float32
+            torch_dtype=torch.float32,
+            device_map="auto"
         )
+        if torch.cuda.is_available():
+            device = "cuda"
+            image_generator.to(device)
 
 class MemeRequest(BaseModel):
     prompt: str
     emotion: str
+
+@app.get("/api/health")
+async def health_check():
+    return {"status": "healthy"}
 
 @app.post("/api/generate-meme")
 async def generate_meme(request: MemeRequest):
@@ -54,7 +65,8 @@ async def generate_meme(request: MemeRequest):
         generated_text = text_generator(prompt_text, max_length=50, num_return_sequences=1)[0]['generated_text']
         
         # Generate image using Stable Diffusion
-        image = image_generator(prompt_text).images[0]
+        with torch.inference_mode():
+            image = image_generator(prompt_text, num_inference_steps=20).images[0]
         
         # Add text to image
         draw = ImageDraw.Draw(image)
@@ -62,7 +74,17 @@ async def generate_meme(request: MemeRequest):
         try:
             font = ImageFont.truetype("arial.ttf", 36)
         except:
-            font = ImageFont.load_default()
+            try:
+                # Try to find system fonts
+                import sys
+                if sys.platform == "win32":
+                    font = ImageFont.truetype("C:\\Windows\\Fonts\\arial.ttf", 36)
+                elif sys.platform == "darwin":
+                    font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 36)
+                else:
+                    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 36)
+            except:
+                font = ImageFont.load_default()
         
         # Position text at the top of the image
         text_position = (10, 10)
@@ -80,6 +102,7 @@ async def generate_meme(request: MemeRequest):
         })
         
     except Exception as e:
+        print(f"Error generating meme: {str(e)}")  # Add logging
         raise HTTPException(status_code=500, detail=str(e))
 
 # For local development
