@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadingElement.classList.remove('hidden');
             resultElement.classList.add('hidden');
             generateBtn.disabled = true;
+            anotherBtn.disabled = true;
 
             const response = await fetch(`${API_URL}/api/generate-meme`, {
                 method: 'POST',
@@ -32,11 +33,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to generate meme');
-            }
-
             const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Failed to generate meme');
+            }
             
             // Update the image
             memeImage.src = data.meme_image;
@@ -46,16 +47,35 @@ document.addEventListener('DOMContentLoaded', () => {
             resultElement.classList.remove('hidden');
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to generate meme. Please try again.');
+            loadingElement.classList.add('hidden');
+            
+            // Show error message to user
+            const errorMessage = error.message.includes('Failed to fetch') 
+                ? 'Unable to connect to the server. Please check your internet connection and try again.'
+                : error.message;
+            
+            alert(errorMessage);
         } finally {
             generateBtn.disabled = false;
+            anotherBtn.disabled = false;
         }
     }
+
+    // Add error handling for image loading
+    memeImage.addEventListener('error', () => {
+        console.error('Error loading meme image');
+        loadingElement.classList.add('hidden');
+        alert('Error loading the generated meme image. Please try again.');
+    });
 
     generateBtn.addEventListener('click', generateMeme);
     anotherBtn.addEventListener('click', generateMeme);
 
     downloadBtn.addEventListener('click', () => {
+        if (!memeImage.src) {
+            alert('No meme to download. Please generate one first.');
+            return;
+        }
         const link = document.createElement('a');
         link.download = 'random-meme.png';
         link.href = memeImage.src;
@@ -63,6 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     shareBtn.addEventListener('click', async () => {
+        if (!memeImage.src) {
+            alert('No meme to share. Please generate one first.');
+            return;
+        }
+        
         try {
             if (navigator.share) {
                 await navigator.share({
@@ -82,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error sharing:', error);
-            alert('Failed to share meme');
+            alert('Failed to share meme: ' + error.message);
         }
     });
 
