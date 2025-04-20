@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update API URL to work with both local development and production
     const API_URL = window.location.hostname === 'localhost' 
         ? 'http://localhost:8000' 
-        : 'https://' + window.location.hostname;
+        : '';  // In production, use relative URL to avoid CORS issues
 
     async function generateMeme() {
         const emotion = emotionSelect.value;
@@ -33,7 +33,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                // If response is not JSON, get the text for error message
+                const text = await response.text();
+                throw new Error(
+                    response.status === 404 
+                        ? 'Server not found. Please make sure the backend server is running.'
+                        : `Server error: ${text.slice(0, 100)}...`
+                );
+            }
 
             if (!response.ok) {
                 throw new Error(data.detail || 'Failed to generate meme');
@@ -49,10 +61,17 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error:', error);
             loadingElement.classList.add('hidden');
             
-            // Show error message to user
-            const errorMessage = error.message.includes('Failed to fetch') 
-                ? 'Unable to connect to the server. Please check your internet connection and try again.'
-                : error.message;
+            // Show appropriate error message based on the error type
+            let errorMessage;
+            if (error.message.includes('Failed to fetch')) {
+                errorMessage = 'Unable to connect to the server. Please check if the backend server is running and try again.';
+            } else if (error.message.includes('Server not found')) {
+                errorMessage = error.message;
+            } else if (error.message.includes('Server error')) {
+                errorMessage = 'The server encountered an error. Please try again or check the server logs.';
+            } else {
+                errorMessage = error.message;
+            }
             
             alert(errorMessage);
         } finally {
@@ -111,6 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Generate a meme when the page loads
-    generateMeme();
+    // Don't auto-generate on load to avoid immediate errors
+    // generateMeme();
 }); 

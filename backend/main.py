@@ -1,6 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import PlainTextResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from PIL import Image, ImageDraw, ImageFont
 import io
 import base64
@@ -10,21 +13,45 @@ import sys
 import random
 from datetime import datetime
 import logging
+import traceback
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Enable CORS
+# Enable Gzip compression
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Enable CORS - update with your frontend URL in production
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Update this with your frontend URL in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Custom error handler for all exceptions
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": str(exc.detail)}
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    # Log the full error with traceback
+    logger.error(f"Unexpected error: {str(exc)}\n{traceback.format_exc()}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected error occurred. Please try again."}
+    )
 
 class MemeRequest(BaseModel):
     emotion: str
@@ -182,12 +209,39 @@ def get_font(size: int) -> ImageFont.FreeTypeFont:
         logger.error(f"Error in get_font: {str(e)}")
         raise
 
+@app.get("/")
+async def root():
+    """Root endpoint to verify the server is running."""
+    return {"status": "Server is running", "version": "1.0.0"}
+
 @app.get("/api/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat()
-    }
+    """Health check endpoint with detailed status."""
+    try:
+        # Test image creation
+        test_image = Image.new('RGB', (100, 100))
+        test_draw = ImageDraw.Draw(test_image)
+        test_font = get_font(12)
+        
+        return {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "checks": {
+                "image_creation": "ok",
+                "font_loading": "ok",
+                "system": sys.platform
+            }
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "status": "unhealthy",
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+        )
 
 @app.post("/api/generate-meme")
 async def generate_meme(request: MemeRequest):
