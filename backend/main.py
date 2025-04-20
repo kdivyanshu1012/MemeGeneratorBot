@@ -22,17 +22,70 @@ app.add_middleware(
 )
 
 class MemeRequest(BaseModel):
-    prompt: str
     emotion: str
 
-def generate_meme_text(prompt: str, emotion: str) -> str:
+# Predefined prompts for different emotions
+PROMPTS = {
+    "funny": [
+        "trying to code at 3 AM",
+        "debugging without console.log",
+        "when the code works on first try",
+        "finding a semicolon error after 2 hours",
+        "using Stack Overflow for the 100th time today",
+        "when someone says they'll fix the bug later",
+        "forgetting to save the file",
+        "when the client says it's a small change"
+    ],
+    "sarcastic": [
+        "meetings that could have been emails",
+        "documentation that's totally up to date",
+        "perfectly commented code",
+        "code review feedback",
+        "project deadlines",
+        "agile planning",
+        "testing in production",
+        "legacy code maintenance"
+    ],
+    "wholesome": [
+        "helping junior developers",
+        "successfully fixing a bug",
+        "team collaboration",
+        "learning new technologies",
+        "code that runs smoothly",
+        "positive code reviews",
+        "clean code practices",
+        "celebrating project milestones"
+    ],
+    "ironic": [
+        "writing temporary code",
+        "saying you'll document later",
+        "promising to refactor soon",
+        "backup plans",
+        "code optimization",
+        "following best practices",
+        "meeting estimations",
+        "work-life balance"
+    ],
+    "dramatic": [
+        "production server crashes",
+        "losing unsaved work",
+        "merge conflicts",
+        "database migrations",
+        "deadline approaching",
+        "missing semicolons",
+        "infinite loops",
+        "memory leaks"
+    ]
+}
+
+def generate_meme_text(emotion: str) -> tuple[str, str]:
     """Generate meme text based on templates and random selection."""
     templates = {
         "funny": [
             "When {prompt} and you can't even...",
-            "Nobody:\nAbsolutely nobody:\nMe with {prompt}:",
+            "Nobody:\nAbsolutely nobody:\nMe when {prompt}:",
             "That moment when {prompt} hits different",
-            "{prompt}? More like fun time!",
+            "POV: {prompt}",
         ],
         "sarcastic": [
             "Oh sure, because {prompt} always works out great...",
@@ -47,7 +100,7 @@ def generate_meme_text(prompt: str, emotion: str) -> str:
             "When {prompt} brings people together",
         ],
         "ironic": [
-            "Trying to avoid {prompt}\nAlso me: *does exactly {prompt}*",
+            "Trying to avoid {prompt}\nAlso me: *does exactly that*",
             "Plot twist: {prompt} was the solution all along",
             "Me: I'm done with {prompt}\nLife: Are you sure about that?",
             "When {prompt} becomes your personality",
@@ -62,8 +115,12 @@ def generate_meme_text(prompt: str, emotion: str) -> str:
 
     # Default to funny if emotion not found
     templates_for_emotion = templates.get(emotion.lower(), templates["funny"])
+    prompts_for_emotion = PROMPTS.get(emotion.lower(), PROMPTS["funny"])
+    
     template = random.choice(templates_for_emotion)
-    return template.format(prompt=prompt)
+    prompt = random.choice(prompts_for_emotion)
+    
+    return template.format(prompt=prompt), prompt
 
 def generate_gradient_background(width: int, height: int, emotion: str):
     """Generate a gradient background based on emotion."""
@@ -102,7 +159,7 @@ async def health_check():
 async def generate_meme(request: MemeRequest):
     try:
         # Generate meme text
-        meme_text = generate_meme_text(request.prompt, request.emotion)
+        meme_text, prompt = generate_meme_text(request.emotion)
         
         # Create background image
         width, height = 800, 600
@@ -173,6 +230,7 @@ async def generate_meme(request: MemeRequest):
         return JSONResponse({
             "status": "success",
             "meme_text": meme_text,
+            "prompt": prompt,
             "meme_image": f"data:image/png;base64,{img_str}"
         })
         

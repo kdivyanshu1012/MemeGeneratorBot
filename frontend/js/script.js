@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const downloadBtn = document.getElementById('download-btn');
     const shareBtn = document.getElementById('share-btn');
-    const promptInput = document.getElementById('prompt');
+    const anotherBtn = document.getElementById('another-btn');
     const emotionSelect = document.getElementById('emotion');
     const loadingElement = document.getElementById('loading');
     const resultElement = document.getElementById('result');
@@ -13,14 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ? 'http://localhost:8000' 
         : 'https://' + window.location.hostname;
 
-    generateBtn.addEventListener('click', async () => {
-        const prompt = promptInput.value.trim();
+    async function generateMeme() {
         const emotion = emotionSelect.value;
-
-        if (!prompt) {
-            alert('Please enter a prompt for your meme!');
-            return;
-        }
 
         try {
             // Show loading state
@@ -34,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    prompt,
                     emotion
                 })
             });
@@ -57,11 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             generateBtn.disabled = false;
         }
-    });
+    }
+
+    generateBtn.addEventListener('click', generateMeme);
+    anotherBtn.addEventListener('click', generateMeme);
 
     downloadBtn.addEventListener('click', () => {
         const link = document.createElement('a');
-        link.download = 'ai-generated-meme.png';
+        link.download = 'random-meme.png';
         link.href = memeImage.src;
         link.click();
     });
@@ -70,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             if (navigator.share) {
                 await navigator.share({
-                    title: 'Check out this AI-generated meme!',
-                    text: 'I created this meme using AI!',
+                    title: 'Check out this random meme!',
+                    text: 'I generated this meme using the Random Meme Generator!',
                     url: memeImage.src
                 });
             } else {
@@ -90,11 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add input validation and character limit
-    promptInput.addEventListener('input', (e) => {
-        const maxLength = 100;
-        if (e.target.value.length > maxLength) {
-            e.target.value = e.target.value.slice(0, maxLength);
-        }
-    });
+    // Generate a meme when the page loads
+    generateMeme();
 }); 
